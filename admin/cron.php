@@ -1,4 +1,4 @@
-<?php // $Id$
+<?php // $Id: cron.php,v 1.126.2.22 2011/08/30 23:43:18 moodlerobot Exp $
 
 /// This script looks through all the module directories for cron.php files
 /// and runs them.  These files can contain cleanup functions, email functions
@@ -9,11 +9,11 @@
 /// version of PHP compiled for CGI.
 ///
 /// eg   wget -q -O /dev/null 'http://moodle.somewhere.edu/admin/cron.php'
-/// or   php /web/moodle/admin/cron.php 
+/// or   php /web/moodle/admin/cron.php
     set_time_limit(0);
     $starttime = microtime();
 
-/// The following is a hack necessary to allow this script to work well 
+/// The following is a hack necessary to allow this script to work well
 /// from the command line.
 
     define('FULLME', 'cron');
@@ -31,6 +31,26 @@
     }
 
     require_once(dirname(__FILE__) . '/../config.php');
+
+    define ('LOCK_FILE','/cronrunning');
+
+    if (file_exists($CFG->dataroot.LOCK_FILE)) {
+        $time=file_get_contents($CFG->dataroot.LOCK_FILE);
+        $err="previous cron is still running started at ".userdate($time);
+        mtrace ($err);
+        add_to_log(SITEID, 'cron', 'cron', '', $err);
+        $admin=get_record('user','username','ppollet');
+        $subject = "execution cron moodle ".$CFG->wwwroot;
+        email_to_user($admin,$admin,$subject,$err);
+
+        exit;
+    }
+
+    set_time_limit(0);   //important
+    file_put_contents($CFG->dataroot.LOCK_FILE,time());
+
+
+
     require_once($CFG->libdir.'/adminlib.php');
     require_once($CFG->libdir.'/gradelib.php');
 
@@ -48,7 +68,7 @@
 
 /// check if execution allowed
     if (isset($_SERVER['REMOTE_ADDR'])) { // if the script is accessed via the web.
-        if (!empty($CFG->cronclionly)) { 
+        if (!empty($CFG->cronclionly)) {
             // This script can only be run via the cli.
             print_error('cronerrorclionly', 'admin');
             exit;
@@ -58,7 +78,7 @@
             $pass = optional_param('password', '', PARAM_RAW);
             if($pass != $CFG->cronremotepassword) {
                 // wrong password.
-                print_error('cronerrorpassword', 'admin'); 
+                print_error('cronerrorpassword', 'admin');
                 exit;
             }
         }
@@ -142,7 +162,7 @@
             if (file_exists($blockfile)) {
                 require_once($blockfile);
                 $classname = 'block_'.$block->name;
-                $blockobj = new $classname; 
+                $blockobj = new $classname;
                 if (method_exists($blockobj,'cron')) {
                     mtrace("Processing cron function for ".$block->name.'....','');
                     if ($blockobj->cron()) {
@@ -228,7 +248,7 @@
     mtrace('done.');
 
 /// Run all core cron jobs, but not every time since they aren't too important.
-/// These don't have a timer to reduce load, so we'll use a random number 
+/// These don't have a timer to reduce load, so we'll use a random number
 /// to randomly choose the percentage of times we should run these jobs.
 
     srand ((double) microtime() * 10000000);
@@ -374,14 +394,14 @@
             tag_cron();
             mtrace ('Executed tag cron');
         }
-        
+
         // Accesslib stuff
         cleanup_contexts();
         mtrace ('Cleaned up contexts');
         gc_cache_flags();
         mtrace ('Cleaned cache flags');
         // If you suspect that the context paths are somehow corrupt
-        // replace the line below with: build_context_path(true); 
+        // replace the line below with: build_context_path(true);
         build_context_path();
         mtrace ('Built context paths');
 
@@ -396,8 +416,8 @@
         @set_time_limit(0);
         @raise_memory_limit("192M");
         if (function_exists('apache_child_terminate')) {
-            // if we are running from Apache, give httpd a hint that 
-            // it can recycle the process after it's done. Apache's 
+            // if we are running from Apache, give httpd a hint that
+            // it can recycle the process after it's done. Apache's
             // memory management is truly awful but we can help it.
             @apache_child_terminate();
         }
@@ -410,7 +430,7 @@
             include_once("$CFG->dirroot/backup/lib.php");
             require_once ("$CFG->libdir/blocklib.php");
             mtrace("Running backups if required...");
-    
+
             if (! schedule_backup_cron()) {
                 mtrace("ERROR: Something went wrong while performing backup tasks!!!");
             } else {
@@ -540,11 +560,13 @@
     mtrace("Cron script completed correctly");
 
     $difftime = microtime_diff($starttime, microtime());
-    mtrace("Execution took ".$difftime." seconds"); 
+    mtrace("Execution took ".$difftime." seconds");
 
 /// finish the IE hack
     if (check_browser_version('MSIE')) {
         echo "</xmp>";
     }
+
+    unlink($CFG->dataroot.LOCK_FILE);
 
 ?>
