@@ -1,0 +1,178 @@
+body {
+	background-image :none;
+        font-family:"Lucida Grande",Verdana,Geneva,Helvetica,Arial,sans-serif;
+	font-size: 90%;
+}
+
+div#page {
+margin:0 0;;
+padding-top:0;
+width:auto;
+}
+
+
+div#header-home,  div#header{
+background:transparent url(pix/plone//logo.jpg) no-repeat scroll 0 0;
+border:0 none;
+margin:0.5em 1em 1em 0.75em;
+padding:0;
+height:95px;
+}
+
+
+div.navbar {
+background-color:transparent;
+background-image:none;
+background-position:left;
+border-left:1px solid #CCCCCC;
+border-right:1px solid #CCCCCC;
+border-style:none solid;
+clear:both;
+margin:5px 0 0;
+padding:3px 3px 6px 0;
+}
+
+div.logininfo, div.sitelink {
+	display : none;	
+	}
+
+
+
+h1.headermain {
+color:#93BEE2;
+font-size:120%;
+margin:0 0 10px;
+}
+
+.userinfobox .userpicture {
+height:111px;
+width:93px;
+}
+
+.userpicture, .picture user, .picture teacher {
+height:37px;
+width:31px;
+}
+
+
+div.sideblock div.header div.i3,
+div.sideblock div.header div.commands
+{
+background-color:#93BEE2;
+}
+
+div.title
+{
+  border-style: none;
+  background-color:#93BEE2;
+}
+
+div.sideblock div.title h2 {
+	font-style: normal;
+	font-weight: normal;
+	height:15px;
+}
+
+div.sideblock div.content,
+div.sideblock div.i3 {
+  background-color:#FFFFFF;
+}
+
+div.sideblock div.i1 {
+  background-image: url(pix/beige_borders.png);
+ }
+ 
+div.sideblock div.i2 {
+ background:transparent url(pix/beige_borders.png) repeat-y scroll 100% 0;
+}
+
+div.sideblock div.bt div {
+  background-image: url(pix/box.png);
+  height: 15px;
+  left: -13px;
+  position: relative;
+  width: 13px;
+}
+div.sideblock div.bt {
+  background-image: url(pix/box.png);
+  margin: 0 0 0 13px;
+  height: 15px;
+  background-color: transparent;
+}
+div.sideblock div.header div.bt div {
+  background-image: url(pix/box.png);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-color: transparent;
+  height: 15px;
+  left: -13px;
+  position: relative;
+  width: 13px;
+}
+div.sideblock div.header div.bt {
+  background-image: url(pix/box.png);
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  margin: 0 0 0 13px;
+  height: 15px;
+  background-color: transparent;
+}
+div.sideblock div.header div.i1 {
+  background-image: url(pix/borders.png);
+  background-repeat: repeat-y;
+  background-position: 0 0;
+  background-color: transparent;
+  padding: 0 0 0 12px;
+}
+div.sideblock div.header div.i2 {
+  background-image: url(pix/borders.png);
+  background-repeat: repeat-y;
+  background-attachment: scroll;
+  background-position: 100% 0;
+  background-color: transparent;
+  padding: 0 12px 0 0;
+}
+
+div.sideblock div.header div.i3 {
+  padding: 0 0 0 0 ;
+  background-color: :#93BEE2;
+  border-top-width: 0px;
+  border-right-width: 0;
+  border-bottom-width: 0px;
+  border-style: none;
+  border-top-color: :#93BEE2;
+  border-bottom-color: :#93BEE2;
+}
+
+
+div.sideblock div.bb div {
+  background-image: url(pix/beige_box.png);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-color: transparent;
+  height: 12px;
+  left: -13px;
+  position: relative;
+  width: 13px;
+}
+div.sideblock div.bb {
+  background-image: url(pix/beige_box.png);
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  margin: 0 0 0 13px;
+  height: 12px;
+  background-color: transparent;
+}
+
+
+
+
+div#content div.ccbox div.i1 {
+background-image:none; /*url(pix/mask_borders_le.png);*/
+}
+div#content div.ccbox div.i1,
+div#content div.ccbox div.i2,
+div#content div.ccbox div.i3 {
+background-color:#FFFFFF;
+}
+

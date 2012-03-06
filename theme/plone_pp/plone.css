@@ -1,0 +1,167 @@
+#plone {
+font-size:0.75em;
+}
+
+.discreet {
+color:#76797C;
+font-size:85%;
+font-weight:normal;
+}
+
+
+
+/* Plone's Site-wide action menu - font size, contact, index, sitemap etc */
+#portal-siteactions {
+    background-color: transparent;
+    white-space: nowrap;
+    list-style: none;
+    margin: 1px 0 0 0;
+    height: auto;
+    line-height: normal;
+    float: right;
+    /*padding: 3px 2em 3px 0;*/
+    padding: 3px 0.5em 3px 0;
+    
+}
+#portal-siteactions li {
+    display: inline;
+}
+#portal-siteactions li a {
+    background-color: transparent;
+    border: 1px solid White;
+    color: #76797c;
+    height: auto;
+    padding: 0.2em;
+    margin-right: 0.2em;
+    text-decoration: none;
+    text-transform: lowercase;
+}
+#portal-siteactions li.selected a {
+    background-color: #dee7ec;
+    color: #436976;
+    border: 1px solid #8cacbb;
+}
+#portal-siteactions li a:hover {
+    background-color: #dee7ec;
+    color: #436976;
+    border: 1px solid #8cacbb;
+}
+
+.breadcrumb {
+    /* The path bar, including breadcrumbs and add to favorites */
+ /*   border-bottom-color: #8cacbb;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;*/
+    border-bottom : 1px solid #8cacbb;
+ 
+   padding-left: 2em;
+    padding-right: 2em;
+    /*text-transform: lowercase;*/
+}
+
+/*pb du saut de ligne dans le breadcrumb Moodle 1.7*/ 
+li.first { white-space: nowrap; }
+
+
+#portal-personaltools {
+    /* Bar with personalized menu (user preferences, favorites etc) */
+    background-color: #93BEE2;
+    /*border-top-color:#000000;
+    border-top-style: solid;
+    border-top-width: 1px; */
+    border-bottom-color: #000000;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    line-height: 1.3em;
+    color: Black;
+    padding: 0em 3em 0em 3em;
+    margin: 0;
+    text-align: right;
+    /*text-transform: lowercase; */
+    list-style: none;
+}
+#portal-personaltools .portalUser {
+    background: transparent url(pix/plone/user.gif) center left no-repeat;
+    padding-left: 15px;
+}
+
+#portal-personaltools .portalNotLoggedIn {
+    color: Black;
+    padding: 0;
+    background: transparent;
+    background-image: none;
+} /* Used on all descriptions relevant to those not logged in */
+ 
+#portal-personaltools li {
+    background: transparent;
+    padding-left: 8px;
+    color: #436976;
+    margin-left: 1em;
+    display: inline;
+}
+#portal-personaltools li a {
+    text-decoration: none;
+    color: #436976;
+}
+
+
+#portal-globalnav {
+/* Navigational Plone Tabs(tm), implemented by customizing the a tag - they are surprisingly elegant. The power of CSS runs strong in these :) */
+background-color: transparent;
+border-collapse: collapse;
+border-bottom-color: #364970;
+border-bottom-style: solid;
+border-bottom-width: 1px;
+padding: 0em 0em 0em 2em;
+white-space: nowrap;
+list-style: none;
+margin: 0;
+height: auto;
+line-height: normal;
+z-index:10;
+
+}
+
+#portal-globalnav li {
+display: inline;
+}
+
+#portal-globalnav li a {
+/* The normal, unselected tabs. They are all links */
+background: transparent url(pix/plone/onglet_clair.gif) no-repeat;
+border: none;
+border-bottom: #364970 1px solid;
+border-right: #364970 1px solid;
+color: #000066;
+height: auto;
+margin-right: -5px;
+padding: 1px 2em 0px 2.5em;
+line-height: normal;
+text-decoration: none;
+text-transform: capitalize;
+}
+
+#portal-globalnav li.selected a {
+/* The selected tab. There's only one of this */
+background: transparent url(pix/plone/onglet_fonce.gif) no-repeat;
+border-bottom: #93BEE2 1px solid;
+border-left: none;
+border-top: none;
+margin-right: 5px;
+color: #000066;
+}
+
+#portal-globalnav li a:hover {
+background: transparent url(pix/plone/onglet_fonce.gif) no-repeat;
+border-bottom: #364970 1px solid;
+color: #000066;
+}
+
+#portal-globalnav li.selected a:hover {
+border-bottom: #93BEE2 1px solid;
+}
+
+#portal-globalnav li a:active {
+background: transparent url(pix/plone/onglet_fonce.gif) no-repeat;
+color: #000066;
+}
