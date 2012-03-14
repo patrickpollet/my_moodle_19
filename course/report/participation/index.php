@@ -1,4 +1,4 @@
-<?php  // $Id$
+<?php  // $Id: index.php,v 1.20.2.9 2010/11/08 01:26:10 skodak Exp $
 
     require_once('../../../config.php');
     require_once($CFG->dirroot.'/lib/tablelib.php');
@@ -14,6 +14,10 @@
     $page       = optional_param('page', 0, PARAM_INT);                     // which page to show
     $perpage    = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT);  // how many per page
 
+    //PATCH PP
+    $group = optional_param('group',0,PARAM_INT);
+    //END PATCH PP
+
     if ($action != 'view' and $action != 'post') {
         $action = ''; // default to all (don't restrict)
     }
@@ -25,6 +29,11 @@
     if ($roleid != 0 and !$role = get_record('role', 'id', $roleid)) {
         print_error('invalidrole');
     }
+    //PATCH PP
+    if ($group !=0 and !$tmp= get_record('groups', 'id', $group)) {
+        print_error('invalidgroup');
+    }
+    //END PATCH PP
 
     require_login($course);
     $context = get_context_instance(CONTEXT_COURSE, $course->id);
@@ -120,6 +129,22 @@
     choose_from_menu($timeoptions,'timefrom',$timefrom);
     echo '<label for="menuroleid">'.get_string('showonly').'</label>'."\n";
     choose_from_menu($roleoptions,'roleid',$roleid,'');
+
+
+     //PATCH PP
+      if ($cgroups = groups_get_all_groups($course->id)) {
+            foreach ($cgroups as $cgroup) {
+                $groups[$cgroup->id] = $cgroup->name;
+            }
+        }
+        else {
+            $groups = array();
+        }
+        choose_from_menu ($groups, "group", $group, get_string("allgroups") );
+      //END PATCH PP
+
+
+
     echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
     choose_from_menu($actionoptions,'action',$action,'');
     helpbutton('participationreport',get_string('participationreport'));
@@ -128,6 +153,11 @@
     $baseurl =  $CFG->wwwroot.'/course/report/participation/index.php?id='.$course->id.'&amp;roleid='
         .$roleid.'&amp;instanceid='.$instanceid.'&amp;timefrom='.$timefrom.'&amp;action='.$action.'&amp;perpage='.$perpage;
 
+    //PATCH PP
+    if ($group) {
+        $baseurl.='&amp;group='.$group;
+    }
+    //END PATCH PP
     if (!empty($instanceid) && !empty($roleid)) {
         // from here assume we have at least the module we're using.
         $cm = $modinfo->cms[$instanceid];
@@ -189,6 +219,14 @@
                     SELECT userid, COUNT(action) AS actioncount FROM {$CFG->prefix}log WHERE cmid = $instanceid AND time > $timefrom AND $actionsql GROUP BY userid
                 ) l ON (l.userid = ra.userid)";
 
+        //PATCH PP
+        if ($group) {
+            $sql .="
+                 JOIN (
+                     SELECT userid FROM {$CFG->prefix}groups_members WHERE groupid=$group) gm on (gm.userid=ra.userid)
+            ";
+        }
+        //END PATCH PP
 
         if ($table->get_sql_where()) {
             $sql .= ' WHERE '.$table->get_sql_where(); //initial bar
@@ -201,7 +239,13 @@
         $countsql = "SELECT COUNT(DISTINCT(ra.userid))
                        FROM {$CFG->prefix}role_assignments ra
                       WHERE ra.contextid $relatedcontexts AND ra.roleid = $roleid";
-
+        //PATCH PP
+        if ($group) {
+            $countsql .= "
+                    AND ra.userid IN (SELECT userid from {$CFG->prefix}groups_members WHERE groupid=$group)
+            ";
+        }
+        //END PATCH PP
         $totalcount = count_records_sql($countsql);
 
         if ($table->get_sql_where()) {
@@ -224,7 +268,7 @@
         $data = array();
 
         $a->count = $totalcount;
-        $a->items = $role->name;
+        $a->items = $role->name.'s';
 
         if ($matchcount != $totalcount) {
             $a->count = $matchcount.'/'.$a->count;
@@ -276,6 +320,7 @@ function checknos() {
         echo '<input type="hidden" name="sesskey" value="'.$USER->sesskey.'" />'."\n";
 
         foreach ($users as $u) {
+
             $data = array('<a href="'.$CFG->wwwroot.'/user/view.php?id='.$u->userid.'&amp;course='.$course->id.'">'.fullname($u,true).'</a>'."\n",
                           ((!empty($u->count)) ? get_string('yes').' ('.$u->count.') ' : get_string('no')),
                           '<input type="checkbox" name="user'.$u->userid.'" value="'.$u->count.'" />'."\n",
