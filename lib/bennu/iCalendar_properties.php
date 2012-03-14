@@ -210,7 +210,8 @@ class iCalendar_property {
         $string .= ':'.$this->value;
 
         return rfc2445_fold($string) . RFC2445_CRLF;
-    }
+    } 
+    
 }
 
 // 4.7 Calendar Properties
@@ -1036,7 +1037,64 @@ class iCalendar_property_rrule extends iCalendar_property {
     }
 }
 
-// TODO: 4.8.6 Alarm Component Properties
+// 4.8.6 Alarm Component Properties
+// -------------------------------------------
+class iCalendar_property_action extends iCalendar_property {
+	var $name      = 'ACTION';
+    var $val_type   = RFC2445_TYPE_TEXT;
+    
+    function construct() {
+        $this->valid_parameters = array(
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+    
+    function is_valid_value($value) {
+        if(!parent::is_valid_value($value)) {
+            return false;
+        }
+        
+        // Value must be one of the following, or an x-name.
+        $valid_values = array('ACTION', 'DISPLAY', 'EMAIL', 'PROCEDURE');
+        return(in_array($value, $valid_values) || rfc2445_is_xname($value));        
+        
+    }
+}
+
+class iCalendar_property_repeat extends iCalendar_property {
+    var $name      = 'REPEAT';
+    var $val_type   = RFC2445_TYPE_INTEGER;
+    
+    function construct() {
+        $this->valid_parameters = array(
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }   
+}
+
+class iCalendar_property_trigger extends iCalendar_property {
+    var $name      = 'TRIGGER';
+    var $val_type   = RFC2445_TYPE_TEXT;
+    
+    function construct() {
+        $this->valid_parameters = array(
+            'VALUE' => RFC2445_OPTIONAL | RFC2445_ONCE,
+            'RELATED' => RFC2445_OPTIONAL | RFC2445_ONCE,
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+    
+    function is_valid_value($value) {        
+    	if(!parent::is_valid_value($value)) {
+            return false;
+        }
+        // Must either be DURATION or DATE_TIME type
+        return(rfc2445_is_valid_value($value, RFC2445_TYPE_DURATION) 
+            || rfc2445_is_valid_value($value, RFC2445_TYPE_DATE_TIME));
+    }
+}
+
+
 
 // 4.8.7 Change Management Component Properties
 // --------------------------------------------
@@ -1279,6 +1337,88 @@ class iCalendar_property_request_status extends iCalendar_property {
     }
 
 }
+
+class iCalendar_property_tzid extends iCalendar_property {
+
+    var $name        = 'TZID';
+    var $val_type    = RFC2445_TYPE_TEXT;
+
+    function construct() {
+        $this->valid_parameters = array(
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+
+    function is_valid_value($value) {
+        if(!parent::is_valid_value($value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+class iCalendar_property_tzname extends iCalendar_property {
+
+    var $name        = 'TZNAME';
+    var $val_type    = RFC2445_TYPE_TEXT;
+
+    function construct() {
+        $this->valid_parameters = array(
+            'LANGUAGE' => RFC2445_OPTIONAL | RFC2445_ONCE,
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+
+    function is_valid_value($value) {
+        if(!parent::is_valid_value($value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+class iCalendar_property_tzoffsetfrom extends iCalendar_property {
+
+    var $name        = 'TZOFFSETFROM';
+    var $val_type    = RFC2445_TYPE_UTC_OFFSET;
+
+    function construct() {
+        $this->valid_parameters = array(
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+
+    function is_valid_value($value) {
+        if(!parent::is_valid_value($value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+class iCalendar_property_tzoffsetto extends iCalendar_property {
+
+    var $name        = 'TZOFFSETTO';
+    var $val_type    = RFC2445_TYPE_UTC_OFFSET;
+
+    function construct() {
+        $this->valid_parameters = array(
+            RFC2445_XNAME => RFC2445_OPTIONAL
+        );
+    }
+
+    function is_valid_value($value) {
+        if(!parent::is_valid_value($value)) {
+            return false;
+        } else {
+        	return true;
+        }
+    }
+}
+
 
 
 #######################
