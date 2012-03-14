@@ -1,11 +1,12 @@
-<?php // $Id$
+<?php // $Id: assign.php,v 1.63.2.18 2011/08/18 00:53:34 moodlerobot Exp $
       // Script to assign users to contexts
 
     require_once('../../config.php');
     require_once($CFG->dirroot.'/mod/forum/lib.php');
     require_once($CFG->libdir.'/adminlib.php');
 
-    define("MAX_USERS_PER_PAGE", 5000);
+    //define("MAX_USERS_PER_PAGE", 5000);
+    define("MAX_USERS_PER_PAGE", 9999);  //PP annuaire INSa ~8000
     define("MAX_USERS_TO_LIST_PER_ROLE", 10);
 
     $contextid      = required_param('contextid',PARAM_INT); // context id
@@ -207,7 +208,7 @@
                     }
                 }
             }
-            
+
             $rolename = get_field('role', 'name', 'id', $roleid);
             add_to_log($course->id, 'role', 'assign', 'admin/roles/assign.php?contextid='.$context->id.'&roleid='.$roleid, $rolename, '', $USER->id);
         } else if ($remove and !empty($frm->removeselect) and confirm_sesskey()) {
@@ -243,16 +244,16 @@
                     }
                 }
             }
-            
+
             $rolename = get_field('role', 'name', 'id', $roleid);
             add_to_log($course->id, 'role', 'unassign', 'admin/roles/assign.php?contextid='.$context->id.'&roleid='.$roleid, $rolename, '', $USER->id);
         } else if ($showall) {
             $searchtext = '';
             $previoussearch = 0;
         }
-        
-        
-    
+
+
+
     }
 
     if ($context->contextlevel==CONTEXT_COURSE and $context->instanceid == SITEID) {
@@ -270,7 +271,7 @@
     /// Get all existing participants in this context.
         // Why is this not done with get_users???
 
-        if (!$contextusers = get_role_users($roleid, $context, false, 'u.id, u.firstname, u.lastname, u.email, ra.hidden')) {
+        if (!$contextusers = get_role_users($roleid, $context, false, 'u.id, u.firstname, u.lastname, u.email, ra.hidden,u.idnumber,u.institution,u.department,u.address,u.groupe_scol')) {
             $contextusers = array();
         }
 
@@ -284,7 +285,8 @@
             $LIKE      = sql_ilike();
             $FULLNAME  = sql_fullname();
 
-            $selectsql = " AND ($FULLNAME $LIKE '%$searchtext%' OR email $LIKE '%$searchtext%') ";
+            //$selectsql = " AND ($FULLNAME $LIKE '%$searchtext%' OR email $LIKE '%$searchtext%') ";
+             $selectsql = " AND ($FULLNAME $LIKE '%$searchtext%' OR email $LIKE '%$searchtext%' OR groupe_scol $LIKE '%$searchtext%' OR department $LIKE '%$searchtext%' OR institution $LIKE '%$searchtext%' OR address $LIKE '%$searchtext%') ";
             $select  .= $selectsql;
         } else {
             $selectsql = "";
@@ -325,7 +327,7 @@
                 if ($validroleids) {
                     $roleids =  '('.implode(',', $validroleids).')';
 
-                    $select = " SELECT DISTINCT u.id, u.firstname, u.lastname, u.email";
+                    $select = " SELECT DISTINCT u.id, u.firstname, u.lastname, u.email,u.idnumber,u.institution,u.department,u.address,u.groupe_scol";
                     $countselect = "SELECT COUNT(u.id)";
                     $from   = " FROM {$CFG->prefix}user u
                                 INNER JOIN {$CFG->prefix}role_assignments ra ON ra.userid = u.id
@@ -359,7 +361,7 @@
 
             /// MDL-11111 do not include user already assigned this role in this context as available users
             /// so that the number of available users is right and we save time looping later
-            $availableusers = get_recordset_sql('SELECT id, firstname, lastname, email
+            $availableusers = get_recordset_sql('SELECT id, firstname, lastname, email,idnumber,institution,department,address,groupe_scol
                                                 FROM '.$CFG->prefix.'user
                                                 WHERE '.$select.'
                                                 AND id NOT IN (
@@ -372,7 +374,7 @@
                                                     '.$selectsql.')
                                                 ORDER BY lastname ASC, firstname ASC');
 
-            $usercount = $availableusers->_numOfRows;         
+            $usercount = $availableusers->_numOfRows;
         }
 
         echo '<div class="selector">';
@@ -395,7 +397,7 @@
             notify($msg);
             print_simple_box_end();
         }
-		
+
 		//Back to Assign Roles button
 		echo "<br/>";
 		echo "<div class='continuebutton'>";
@@ -410,7 +412,7 @@
         }
 
         // Get the names of role holders for roles with between 1 and MAX_USERS_TO_LIST_PER_ROLE users,
-        // and so determine whether to show the extra column. 
+        // and so determine whether to show the extra column.
         $rolehodlercount = array();
         $rolehodlernames = array();
         $strmorethanten = get_string('morethan', 'role', MAX_USERS_TO_LIST_PER_ROLE);
@@ -435,8 +437,8 @@
                 $rolehodlernames[$roleid] = '';
             }
         }
-		
-		
+
+
         // Print overview table
         $table->tablealign = 'center';
         $table->cellpadding = 5;
@@ -460,13 +462,13 @@
             $table->data[] = $row;
         }
         print_table($table);
-		
+
 	   //Continue to Course Button
 	   echo "<br/>";
 	   echo "<div class='continuebutton'>";
 	   print_single_button($CFG->wwwroot.'/course/view.php', array('id' => $courseid), get_string('continuetocourse'));
 	   echo "</div>";
     }
-	
+
     print_footer($course);
 ?>

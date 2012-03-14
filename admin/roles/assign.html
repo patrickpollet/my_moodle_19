@@ -28,7 +28,10 @@
                 } else {
                     $hidden="";
                 }
-                echo "<option value=\"$contextuser->id\">".$fullname.", ".$contextuser->email.$hidden."</option>\n";
+                echo "<option value=\"$contextuser->id\">".$fullname.", ".$contextuser->email.
+                ", ".$contextuser->institution.", ".$contextuser->idnumber.", ".$contextuser->department.", ".$contextuser->address.
+							", ".$contextuser->groupe_scol.              
+                $hidden."</option>\n";
                 $i++;    
             }
             if ($i==0) {
@@ -63,7 +66,10 @@
                 echo "<optgroup label=\"$strsearchresults (" . $usercount . ")\">\n";
                 while ($user = rs_fetch_next_record($availableusers)) {
                     $fullname = fullname($user, true);
-                    echo "<option value=\"$user->id\">".$fullname.", ".$user->email."</option>\n";
+                    echo "<option value=\"$user->id\">".$fullname.", ".$user->email.
+							", ".$user->institution.", ".$user->idnumber.", ".$user->department.", ".$user->address.
+							", ".$user->groupe_scol.
+							"</option>\n";
                     $i++;
                 }
                 echo "</optgroup>\n";
@@ -75,7 +81,10 @@
                 } else {
                     while ($user = rs_fetch_next_record($availableusers)) {
                         $fullname = fullname($user, true);
-                        echo "<option value=\"$user->id\">".$fullname.", ".$user->email."</option>\n";
+                        echo "<option value=\"$user->id\">".$fullname.", ".$user->email.
+							", ".$user->institution.", ".$user->idnumber.", ".$user->department.", ".$user->description.
+							", ".$user->groupe_scol.
+							"</option>\n";
                         $i++;
                     }
                 }
