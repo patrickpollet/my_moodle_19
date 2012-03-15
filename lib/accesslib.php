@@ -1,4 +1,4 @@
-<?php // $Id: accesslib.php,v 1.421.2.111 2011/08/03 16:28:19 moodlerobot Exp $
+<?php // $Id$
 
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
@@ -24,9 +24,9 @@
 ///////////////////////////////////////////////////////////////////////////
 
 /**
- * Public API vs internals
+ * Public API vs internals 
  * -----------------------
- *
+ * 
  * General users probably only care about
  *
  * Context handling
@@ -34,7 +34,7 @@
  * - get_context_instance_by_id()
  * - get_parent_contexts()
  * - get_child_contexts()
- *
+ * 
  * Whether the user can do something...
  * - has_capability()
  * - has_any_capability()
@@ -51,7 +51,7 @@
  * Enrol/unenrol
  * - enrol_into_course()
  * - role_assign()/role_unassign()
- *
+ * 
  *
  * Advanced use
  * - load_all_capabilities()
@@ -65,7 +65,7 @@
  *
  * Name conventions
  * ----------------
- *
+ * 
  * - "ctx" means context
  *
  * accessdata
@@ -73,21 +73,21 @@
  *
  * Access control data is held in the "accessdata" array
  * which - for the logged-in user, will be in $USER->access
- *
+ * 
  * For other users can be generated and passed around (but see
  * the $ACCESS global).
  *
  * $accessdata is a multidimensional array, holding
- * role assignments (RAs), role-capabilities-perm sets
+ * role assignments (RAs), role-capabilities-perm sets 
  * (role defs) and a list of courses we have loaded
  * data for.
  *
- * Things are keyed on "contextpaths" (the path field of
+ * Things are keyed on "contextpaths" (the path field of 
  * the context table) for fast walking up/down the tree.
- *
+ * 
  * $accessdata[ra][$contextpath]= array($roleid)
  *                [$contextpath]= array($roleid)
- *                [$contextpath]= array($roleid)
+ *                [$contextpath]= array($roleid) 
  *
  * Role definitions are stored like this
  * (no cap merge is done - so it's compact)
@@ -102,9 +102,9 @@
  * rdef and ra down to the course level, but not below. This
  * keeps accessdata small and compact. Below-the-course ra/rdef
  * are loaded as needed. We keep track of which courses we
- * have loaded ra/rdef in
+ * have loaded ra/rdef in 
  *
- * $accessdata[loaded] = array($contextpath, $contextpath)
+ * $accessdata[loaded] = array($contextpath, $contextpath) 
  *
  * Stale accessdata
  * ----------------
@@ -114,17 +114,17 @@
  * On each pageload we load $DIRTYPATHS which lists
  * context paths affected by changes. Any check at-or-below
  * a dirty context will trigger a transparent reload of accessdata.
- *
+ * 
  * Changes at the sytem level will force the reload for everyone.
  *
  * Default role caps
  * -----------------
- * The default role assignment is not in the DB, so we
- * add it manually to accessdata.
+ * The default role assignment is not in the DB, so we 
+ * add it manually to accessdata. 
  *
  * This means that functions that work directly off the
  * DB need to ensure that the default role caps
- * are dealt with appropriately.
+ * are dealt with appropriately. 
  *
  */
 
@@ -154,12 +154,12 @@ define('RISK_DATALOSS',    0x0020);
 
 // rolename displays
 define('ROLENAME_ORIGINAL', 0);// the name as defined in the role definition
-define('ROLENAME_ALIAS', 1);   // the name as defined by a role alias
+define('ROLENAME_ALIAS', 1);   // the name as defined by a role alias 
 define('ROLENAME_BOTH', 2);    // Both, like this:  Role alias (Original)
 
 require_once($CFG->dirroot.'/group/lib.php');
 
-if (!defined('MAX_CONTEXT_CACHE_SIZE')) {
+if (!defined('MAX_CONTEXT_CACHE_SIZE')) { 
     define('MAX_CONTEXT_CACHE_SIZE', 5000);
 }
 
@@ -226,7 +226,7 @@ function get_role_context_caps($roleid, $context) {
 }
 
 /**
- * Gets the accessdata for role "sitewide"
+ * Gets the accessdata for role "sitewide" 
  * (system down to course)
  *
  * @return array
@@ -277,7 +277,7 @@ function get_role_access($roleid, $accessdata=NULL) {
             $k = "{$rd->path}:{$roleid}";
             $accessdata['rdef'][$k][$rd->capability] = $rd->permission;
         }
-
+        
     } else {
         if ($rs = get_recordset_sql($sql)) {
             while ($rd = rs_fetch_next_record($rs)) {
@@ -293,7 +293,7 @@ function get_role_access($roleid, $accessdata=NULL) {
 }
 
 /**
- * Gets the accessdata for role "sitewide"
+ * Gets the accessdata for role "sitewide" 
  * (system down to course)
  *
  * @return array
@@ -301,10 +301,10 @@ function get_role_access($roleid, $accessdata=NULL) {
 function get_default_frontpage_role_access($roleid, $accessdata=NULL) {
 
     global $CFG;
-
+    
     $frontpagecontext = get_context_instance(CONTEXT_COURSE, SITEID);
     $base = '/'. SYSCONTEXTID .'/'. $frontpagecontext->id;
-
+ 
     //
     // Overrides for the role in any contexts related to the course
     //
@@ -316,8 +316,8 @@ function get_default_frontpage_role_access($roleid, $accessdata=NULL) {
             WHERE rc.roleid = {$roleid}
                   AND (ctx.id = ".SYSCONTEXTID." OR ctx.path LIKE '$base/%')
                   AND ctx.contextlevel <= ".CONTEXT_COURSE."
-            ORDER BY ctx.depth, ctx.path";
-
+            ORDER BY ctx.depth, ctx.path";             
+            
     if ($rs = get_recordset_sql($sql)) {
         while ($rd = rs_fetch_next_record($rs)) {
             $k = "{$rd->path}:{$roleid}";
@@ -559,13 +559,13 @@ function is_siteadmin($userid) {
 
     $sql = "SELECT SUM(rc.permission)
             FROM " . $CFG->prefix . "role_capabilities rc
-            JOIN " . $CFG->prefix . "context ctx
+            JOIN " . $CFG->prefix . "context ctx 
               ON ctx.id=rc.contextid
             JOIN " . $CFG->prefix . "role_assignments ra
               ON ra.roleid=rc.roleid AND ra.contextid=ctx.id
             WHERE ctx.contextlevel=10
               AND ra.userid={$userid}
-              AND rc.capability IN ('moodle/site:config', 'moodle/legacy:admin', 'moodle/site:doanything')
+              AND rc.capability IN ('moodle/site:config', 'moodle/legacy:admin', 'moodle/site:doanything')       
             GROUP BY rc.capability
             HAVING SUM(rc.permission) > 0";
 
@@ -608,7 +608,7 @@ function path_inaccessdata($path, $accessdata) {
  * capabilities, etc.
  *
  * The main feature of here is being FAST and with no
- * side effects.
+ * side effects. 
  *
  * Notes:
  *
@@ -691,7 +691,7 @@ function has_capability_in_accessdata($capability, $context, $accessdata, $doany
     // role-switches loop
     //
     if (isset($accessdata['rsw'])) {
-        // check for isset() is fast
+        // check for isset() is fast 
         // empty() is slow...
         if (empty($accessdata['rsw'])) {
             unset($accessdata['rsw']); // keep things fast and unambiguous
@@ -725,7 +725,7 @@ function has_capability_in_accessdata($capability, $context, $accessdata, $doany
                     }
                 }
                 // As we are dealing with a switchrole,
-                // we return _here_, do _not_ walk up
+                // we return _here_, do _not_ walk up 
                 // the hierarchy any further
                 if ($can < 1) {
                     if ($doanything) {
@@ -738,7 +738,7 @@ function has_capability_in_accessdata($capability, $context, $accessdata, $doany
                 } else {
                     return true;
                 }
-
+                
             }
         }
     }
@@ -865,7 +865,7 @@ function aggregate_roles_from_accessdata($context, $accessdata) {
 /**
  * This is an easy to use function, combining has_capability() with require_course_login().
  * And will call those where needed.
- *
+ * 
  * It checks for a capability assertion being true.  If it isn't
  * then the page is terminated neatly with a standard error message.
  *
@@ -946,7 +946,7 @@ function require_capability($capability, $context, $userid=NULL, $doanything=tru
  *
  *   - if the user has the cap systemwide, stupidly
  *     grab *every* course for a capcheck. This eats
- *     a TON of bandwidth, specially on large sites
+ *     a TON of bandwidth, specially on large sites 
  *     with separate DBs...
  *
  *   - otherwise, fetch "likely" courses with a wide net
@@ -1009,7 +1009,7 @@ function get_user_courses_bycap($userid, $cap, $accessdata, $doanything, $sort='
                 FROM {$CFG->prefix}course c
                 JOIN {$CFG->prefix}course_categories cc
                   ON c.category=cc.id
-                JOIN {$CFG->prefix}context ctx
+                JOIN {$CFG->prefix}context ctx 
                   ON (c.id=ctx.instanceid AND ctx.contextlevel=".CONTEXT_COURSE.")
                 $sort ";
         $rs = get_recordset_sql($sql);
@@ -1028,7 +1028,7 @@ function get_user_courses_bycap($userid, $cap, $accessdata, $doanything, $sort='
         $rs = get_recordset_sql($sql);
         $catpaths = array();
         while ($catctx = rs_fetch_next_record($rs)) {
-            if ($catctx->path != ''
+            if ($catctx->path != '' 
                 && has_capability_in_accessdata($cap, $catctx, $accessdata, $doanything)) {
                 $catpaths[] = $catctx->path;
             }
@@ -1056,7 +1056,7 @@ function get_user_courses_bycap($userid, $cap, $accessdata, $doanything, $sort='
         /// Enclosing the 3-UNION into an inline_view to avoid column names conflict and making the ORDER BY cross-db
         /// and to allow selection of TEXT columns in the query (MSSQL and Oracle limitation). MDL-16209
         $sql = "
-            SELECT $coursefields, ctxid, ctxpath, ctxdepth, ctxlevel, categorypath
+            SELECT $coursefields, ctxid, ctxpath, ctxdepth, ctxlevel, categorypath 
               FROM (
                     SELECT c.id,
                            ctx.id AS ctxid, ctx.path AS ctxpath,
@@ -1121,7 +1121,7 @@ function get_user_courses_bycap($userid, $cap, $accessdata, $doanything, $sort='
             if ($limit > 0 && $cc >= $limit) {
                 break;
             }
-
+            
             $courses[] = $c;
             $cc++;
         }
@@ -1334,7 +1334,7 @@ function load_subcontext($userid, $context, &$accessdata) {
     // For course contexts, we _already_ have the RAs
     // but the cost of re-fetching is minimal so we don't care.
     //
-    if ($context->contextlevel !== CONTEXT_COURSE
+    if ($context->contextlevel !== CONTEXT_COURSE 
         && $context->path !== "$base/{$context->id}") {
         // Case BLOCK/MODULE/GROUP hanging from a course
         // Assumption: the course _must_ be our parent
@@ -1344,7 +1344,7 @@ function load_subcontext($userid, $context, &$accessdata) {
         $courses = explode('/',get_course_from_path($context->path));
         $targetid = array_pop($courses);
         $context = get_context_instance_by_id($targetid);
-
+                                 
     }
 
     //
@@ -1396,7 +1396,7 @@ function load_subcontext($userid, $context, &$accessdata) {
         $contexts = substr($context->path, 1); // kill leading slash
         $contexts = str_replace('/', ',', $contexts);
         $localroleids = implode(',',$localroles);
-        $wherelocalroles="OR (rc.roleid IN ({$localroleids})
+        $wherelocalroles="OR (rc.roleid IN ({$localroleids}) 
                               AND ctx.id IN ($contexts))" ;
     }
 
@@ -1468,7 +1468,7 @@ function get_role_access_bycontext($roleid, $context, $accessdata=NULL) {
         $accessdata['rdef']   = array();
         $accessdata['loaded'] = array();
     }
-
+    
     $contexts = substr($context->path, 1); // kill leading slash
     $contexts = str_replace('/', ',', $contexts);
 
@@ -1486,7 +1486,7 @@ function get_role_access_bycontext($roleid, $context, $accessdata=NULL) {
             JOIN {$CFG->prefix}context ctx
               ON rc.contextid=ctx.id
             WHERE rc.roleid=$roleid AND
-                  ( ctx.id IN ($contexts) OR
+                  ( ctx.id IN ($contexts) OR 
                     ctx.path LIKE '{$context->path}/%' )
             ORDER BY ctx.depth ASC, ctx.path DESC, rc.roleid ASC ";
 
@@ -1505,17 +1505,17 @@ function get_role_access_bycontext($roleid, $context, $accessdata=NULL) {
  * into the $ACCESS global
  *
  * Used by has_capability() - but feel free
- * to call it if you are about to run a BIG
+ * to call it if you are about to run a BIG 
  * cron run across a bazillion users.
  *
- */
+ */ 
 function load_user_accessdata($userid) {
     global $ACCESS,$CFG;
 
     $base = '/'.SYSCONTEXTID;
 
     $accessdata = get_user_access_sitewide($userid);
-    $frontpagecontext = get_context_instance(CONTEXT_COURSE, SITEID);
+    $frontpagecontext = get_context_instance(CONTEXT_COURSE, SITEID); 
     //
     // provide "default role" & set 'dr'
     //
@@ -1572,7 +1572,7 @@ function compact_rdefs(&$rdefs) {
 }
 
 /**
- *  A convenience function to completely load all the capabilities
+ *  A convenience function to completely load all the capabilities 
  *  for the current user.   This is what gets called from complete_user_login()
  *  for example. Call it only _after_ you've setup $USER and called
  *  check_enrolment_plugins();
@@ -1622,9 +1622,9 @@ function load_all_capabilities() {
             } else {
                 array_push($accessdata['ra'][$base], $CFG->defaultfrontpageroleid);
             }
-        }
+        } 
         $USER->access = $accessdata;
-
+    
     } else if (!empty($CFG->notloggedinroleid)) {
         $USER->access = get_role_access($CFG->notloggedinroleid);
         $USER->access['ra'][$base] = array($CFG->notloggedinroleid);
@@ -1639,12 +1639,12 @@ function load_all_capabilities() {
 }
 
 /**
- * A convenience function to completely reload all the capabilities
+ * A convenience function to completely reload all the capabilities 
  * for the current user when roles have been updated in a relevant
- * context -- but PRESERVING switchroles and loginas.
+ * context -- but PRESERVING switchroles and loginas. 
  *
  * That is - completely transparent to the user.
- *
+ * 
  * Note: rewrites $USER->access completely.
  *
  */
@@ -1661,7 +1661,7 @@ function reload_all_capabilities() {
 
     unset($USER->access);
     unset($USER->mycourses);
-
+    
     load_all_capabilities();
 
     foreach ($sw as $path => $roleid) {
@@ -1690,7 +1690,7 @@ function load_temp_role($context, $roleid, $accessdata) {
     // - all the parents
     // - and below - IOWs overrides...
     //
-
+    
     // turn the path into a list of context ids
     $contexts = substr($context->path, 1); // kill leading slash
     $contexts = str_replace('/', ',', $contexts);
@@ -1965,7 +1965,7 @@ function moodle_install_roles() {
 
 /// Delete the old user tables when we are done
 
-    $tables = array('user_students', 'user_teachers', 'user_coursecreators', 'user_admins');
+    $tables = array('user_students', 'user_teachers', 'user_coursecreators', 'user_admins');  
     foreach ($tables as $tablename) {
         $table = new XMLDBTable($tablename);
         if (table_exists($table)) {
@@ -2095,7 +2095,7 @@ function create_context($contextlevel, $instanceid) {
 
     switch ($contextlevel) {
         case CONTEXT_COURSECAT:
-            $sql = "SELECT ctx.path, ctx.depth
+            $sql = "SELECT ctx.path, ctx.depth 
                     FROM {$CFG->prefix}context           ctx
                     JOIN {$CFG->prefix}course_categories cc
                       ON (cc.parent=ctx.instanceid AND ctx.contextlevel=".CONTEXT_COURSECAT.")
@@ -2506,9 +2506,9 @@ function get_context_instance($contextlevel, $instance=0) {
 
     if ($contextlevel === 'clearcache') {
         // TODO: Remove for v2.0
-        // No longer needed, but we'll catch it to avoid erroring out on custom code.
-        // This used to be a fix for MDL-9016
-        // "Restoring into existing course, deleting first
+        // No longer needed, but we'll catch it to avoid erroring out on custom code. 
+        // This used to be a fix for MDL-9016 
+        // "Restoring into existing course, deleting first 
         //  deletes context and doesn't recreate it"
         return false;
     }
@@ -2565,7 +2565,7 @@ function get_context_instance($contextlevel, $instance=0) {
             $instance = reset($instances);
             $instanceids = "instanceid = $instance";
         }
-
+        
         if (!$contexts = get_records_sql("SELECT instanceid, id, contextlevel, path, depth
                                             FROM {$CFG->prefix}context
                                            WHERE contextlevel=$contextlevel AND $instanceids")) {
@@ -2755,12 +2755,12 @@ function delete_role($roleid) {
 // finally delete the role itself
     // get this before the name is gone for logging
     $rolename = get_field('role', 'name', 'id', $roleid);
-
+    
     if ($success and !delete_records('role', 'id', $roleid)) {
         debugging("Could not delete role record with ID $roleid!");
         $success = false;
     }
-
+    
     if ($success) {
         add_to_log(SITEID, 'role', 'delete', 'admin/roles/action=delete&roleid='.$roleid, $rolename, '', $USER->id);
     }
@@ -2916,12 +2916,12 @@ function role_assign($roleid, $userid, $groupid, $contextid, $timestart=0, $time
     if (!$timemodified) {
         $timemodified = time();
     }
-    // PP
+    // PATCH PP
     // teachera s are always enroled for illimited time, regardless of course settings
-    $teacherrole = get_record('role', 'shortname', 'editingteacher');
-    if ($teacherrole->id == $roleid)
-        $timeend=0;
-    // END PP
+	$teacherrole = get_record('role', 'shortname', 'editingteacher');
+	if ($teacherrole->id == $roleid)
+		$timeend=0;
+	// END PP
 
 /// Check for existing entry
     if ($userid) {
@@ -3212,7 +3212,7 @@ function get_cached_capabilities($component='moodle') {
         $storedcaps = get_records_select('capabilities',
                         "name LIKE 'moodle/%:%'");
     } else if ($component == 'local') {
-        $storedcaps = get_records_select('capabilities',
+        $storedcaps = get_records_select('capabilities', 
                         "name LIKE 'moodle/local:%'");
     } else {
         $storedcaps = get_records_select('capabilities',
@@ -3718,7 +3718,7 @@ function get_parent_contexts($context) {
 function get_parent_contextid($context) {
     $parentcontexts = get_parent_contexts($context);
     if (count($parentcontexts) == 0) {
-        return false;
+        return false; 
     }
     return array_shift($parentcontexts);
 }
@@ -4207,7 +4207,7 @@ function get_assignable_roles($context, $field='name', $rolenamedisplay=ROLENAME
 
     if (!has_capability('moodle/role:assign', $context)) {
         return array();
-    }
+    } 
 
     $parents = get_parent_contexts($context);
     $parents[] = $context->id;
@@ -4294,7 +4294,7 @@ function get_overridable_roles($context, $field='name', $rolenamedisplay=ROLENAM
 
     if (!has_capability('moodle/role:override', $context) and !has_capability('moodle/role:safeoverride', $context)) {
         return array();
-    }
+    } 
 
     $parents = get_parent_contexts($context);
     $parents[] = $context->id;
@@ -4360,7 +4360,7 @@ function get_default_course_role($course) {
  *
  * This can be a very expensive call - use sparingly and keep
  * the results if you are going to need them again soon.
- *
+ * 
  * Note if $fields is empty this function attempts to get u.*
  * which can get rather large - and has a serious perf impact
  * on some DBs.
@@ -4459,7 +4459,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
             }
         }
     }
-
+        
     $roleids = array_unique($roleids);
 
     if (count($roleids)===0) { // noone here!
@@ -4564,14 +4564,14 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
     if ((strpos($sort, 'ul.timeaccess') === FALSE) and (strpos($fields, 'ul.timeaccess') === FALSE)) {  // user_lastaccess is not required MDL-13810
         $uljoin = '';
     } else {
-        $uljoin = "LEFT OUTER JOIN {$CFG->prefix}user_lastaccess ul
+        $uljoin = "LEFT OUTER JOIN {$CFG->prefix}user_lastaccess ul 
                          ON (ul.userid = u.id AND ul.courseid = {$context->instanceid})";
     }
 
     //
     // Simple cases - No negative permissions means we can take shortcuts
     //
-    if (!$negperm) {
+    if (!$negperm) { 
 
         // at the frontpage, and all site users have it - easy!
         if ($frontpageroleinteresting) {
@@ -4586,7 +4586,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
         // TODO: NOT ALWAYS!  Check this case because this gets run for cases like this:
         // 1) Default role has the permission for a module thing like mod/choice:choose
         // 2) We are checking for an activity module context in a course
-        // 3) Thus all users are returned even though course:view is also required
+        // 3) Thus all users are returned even though course:view is also required 
         if ($defaultroleinteresting) {
             $sql = "SELECT $fields
                     FROM {$CFG->prefix}user u
@@ -4647,7 +4647,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
             $roleperms[$rc->capability][$rid] = (object)array('perm'  => $perm,
                                                               'rcdepth' => $rcdepth);
         }
-
+        
     }
 
     if ($context->contextlevel == CONTEXT_SYSTEM
@@ -4661,7 +4661,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
         $ss = "SELECT u.id as userid, ra.roleid,
                       ctx.depth
                FROM {$CFG->prefix}user u
-               LEFT OUTER JOIN {$CFG->prefix}role_assignments ra
+               LEFT OUTER JOIN {$CFG->prefix}role_assignments ra 
                  ON (ra.userid = u.id
                      AND ra.contextid IN ($ctxids)
                      AND ra.roleid IN (".implode(',',$roleids) .")
@@ -4674,7 +4674,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
         // be defined in a role assignment somewhere.
         $ss = "SELECT ra.userid as userid, ra.roleid,
                       ctx.depth
-               FROM {$CFG->prefix}role_assignments ra
+               FROM {$CFG->prefix}role_assignments ra 
                JOIN {$CFG->prefix}context ctx
                  ON ra.contextid=ctx.id
                WHERE ra.contextid IN ($ctxids)
@@ -4720,7 +4720,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
     // - if the user has permission, all is good, just $c++ (counter)
     // - ...else, decrease the counter - so pagination is kept straight,
     //      and (if we are in the page) remove from the results
-    //
+    // 
     $results = array();
 
     // pagination controls
@@ -4730,11 +4730,11 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
 
     //
     // Track our last user id so we know when we are dealing
-    // with a new user...
+    // with a new user... 
     //
     $lastuserid  = 0;
     //
-    // In this loop, we
+    // In this loop, we 
     // $ras: role assignments, multidimensional array
     // treat as a stack - going from local to general
     // $ras = (( roleid=> x, $depth=>y) , ( roleid=> x, $depth=>y))
@@ -4744,7 +4744,7 @@ function get_users_by_capability($context, $capability, $fields='', $sort='',
         //error_log(" Record: " . print_r($user,1));
 
         //
-        // Pagination controls
+        // Pagination controls 
         // Note that we might end up removing a user
         // that ends up _not_ having the rights,
         // therefore rolling back $c
@@ -4914,7 +4914,7 @@ function has_any_capability_from_rarc($ras, $roleperms, $caps) {
             if ($rp->rcdepth  > $hascap[$cap]->rcdepth) {
                 continue;
             }
-            // We match depth - add them
+            // We match depth - add them                
             $hascap[$cap]->perm += $rp->perm;
         }
     }
@@ -5103,7 +5103,7 @@ function count_role_users($roleid, $context, $parent=false) {
 
     $SQL = "SELECT count(u.id)
         FROM {$CFG->prefix}role_assignments r
-        JOIN {$CFG->prefix}user u
+        JOIN {$CFG->prefix}user u 
           ON u.id = r.userid
         WHERE (r.contextid = $context->id $parentcontexts)
         $rolesql
@@ -5207,7 +5207,7 @@ function get_roles_on_exact_context($context) {
  * To "unswitch" pass 0 as the roleid.
  *
  * This function *will* modify $USER->access - beware
- *
+ * 
  * @param integer $roleid
  * @param object $context
  * @return bool
@@ -5230,13 +5230,13 @@ function role_switch($roleid, $context) {
     // - When visiting subcontexts, our selective accessdata loading
     //   will still work fine - though those ra/rdefs will be ignored
     //   appropriately while the switch is in place
-    //
-    // - If a switcheroo happens at a category with tons of courses
+    // 
+    // - If a switcheroo happens at a category with tons of courses 
     //   (that have many overrides for switched-to role), the session
     //   will get... quite large. Sometimes you just can't win.
     //
     // To un-switch just unset($USER->access['rsw'][$path])
-    //
+    // 
 
     // Add the switch RA
     if (!isset($USER->access['rsw'])) {
@@ -5252,13 +5252,13 @@ function role_switch($roleid, $context) {
     }
 
     $USER->access['rsw'][$context->path]=$roleid;
-
+    
     // Load roledefs
     $USER->access = get_role_access_bycontext($roleid, $context,
                                               $USER->access);
 
     /* DO WE NEED THIS AT ALL???
-    // Add some permissions we are really going
+    // Add some permissions we are really going 
     // to always need, even if the role doesn't have them!
 
     $USER->capabilities[$context->id]['moodle/course:view'] = CAP_ALLOW;
@@ -5514,7 +5514,7 @@ function build_context_path($force=false, $feedback=false) {
                                        WHERE temp.id = ctx.id)
                        $ctxemptyclause";
         execute_sql($sql, $feedback);
-
+        
         // this is needed after every loop
         // MDL-11532
         execute_sql($updatesql, $feedback);
@@ -5609,7 +5609,7 @@ function build_context_path($force=false, $feedback=false) {
 /**
  * Update the path field of the context and
  * all the dependent subcontexts that follow
- * the move.
+ * the move. 
  *
  * The most important thing here is to be as
  * DB efficient as possible. This op can have a
@@ -5629,7 +5629,7 @@ function context_moved($context, $newparent) {
     if (($newparent->depth +1) != $context->depth) {
         $setdepth = ", depth= depth + ({$newparent->depth} - {$context->depth}) + 1";
     }
-    $sql = "UPDATE {$CFG->prefix}context
+    $sql = "UPDATE {$CFG->prefix}context 
             SET path='$newpath'
                 $setdepth
             WHERE path='$frompath'";
@@ -5655,7 +5655,7 @@ function context_moved($context, $newparent) {
 /**
  * Turn the ctx* fields in an objectlike record
  * into a context subobject. This allows
- * us to SELECT from major tables JOINing with
+ * us to SELECT from major tables JOINing with 
  * context at no cost, saving a ton of context
  * lookups...
  */
@@ -5675,7 +5675,7 @@ function make_context_subobj($rec) {
  * Do some basic, quick checks to see whether $rec->context looks like a
  * valid context object.
  *
- * @param object $rec a think that has a context, for example a course,
+ * @param object $rec a think that has a context, for example a course, 
  *      course category, course modules, etc.
  * @param integer $contextlevel the type of thing $rec is, one of the CONTEXT_... constants.
  * @return boolean whether $rec->context looks like the correct context object
@@ -5750,7 +5750,7 @@ function is_contextpath_dirty($pathcontexts, $dirty) {
 }
 
 /**
- *
+ * 
  * switch role order (used in admin/roles/manage.php)
  *
  * @param int $first id of role to move down
